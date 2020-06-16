@@ -22,6 +22,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
@@ -65,8 +66,8 @@ public class MainActivity extends AppCompatActivity {
                                         .getCurrentUser()
                                         .getDisplayName())
                         );
+                Log.d("Input test : ", input.getText().toString());
                 input.setText("");
-                Log.d(input.getText());
             }
         });
 
@@ -75,7 +76,10 @@ public class MainActivity extends AppCompatActivity {
     public void displayMessages(){
         ListView listOfMessages = (ListView)findViewById(R.id.list_of_messages);
 
-        Query query = FirebaseDatabase.getInstance().getReference().child("chats");
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        String uid = firebaseUser.getUid();
+
+        Query query = FirebaseDatabase.getInstance().getReference().child(uid);
 
         FirebaseListOptions<MessageModel> options =
                 new FirebaseListOptions.Builder<MessageModel>()
