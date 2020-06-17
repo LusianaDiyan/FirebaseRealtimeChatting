@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
                 EditText input = (EditText)findViewById(R.id.input);
                 FirebaseDatabase.getInstance()
                         .getReference()
+                        .child("chatting")
                         .push()
                         .setValue(new MessageModel(input.getText().toString(),
                                 FirebaseAuth.getInstance()
