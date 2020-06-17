@@ -88,10 +88,10 @@ public class MainActivity extends AppCompatActivity {
                         .setLayout(android.R.layout.simple_list_item_1)
                         .build();
 
-        /*FirebaseListAdapter<MessageModel> adapter = new FirebaseListAdapter<MessageModel>(this, MessageModel.class,
-                R.layout.activity_message, FirebaseDatabase.getInstance().getReference()) {*/
+        FirebaseListAdapter<MessageModel> adapter = new FirebaseListAdapter<MessageModel>(this, MessageModel.class,
+                R.layout.activity_message, FirebaseDatabase.getInstance().getReference()) {
 
-        FirebaseListAdapter<MessageModel> adapter = new FirebaseListAdapter<MessageModel>(options) {
+        /*FirebaseListAdapter<MessageModel> adapter = new FirebaseListAdapter<MessageModel>(options) {*/
             @Override
             protected void populateView(View v, MessageModel model, int position) {
                 TextView messageText = (TextView) v.findViewById(R.id.message_text);
