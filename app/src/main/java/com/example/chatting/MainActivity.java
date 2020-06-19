@@ -4,9 +4,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -23,16 +26,24 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
 public class MainActivity extends AppCompatActivity {
     int SIGN_IN_REQUEST_CODE = 1;
+    Button btn;
+
+    private DatabaseReference mDatabase;
+    ListView listOfMessages;
+    FirebaseListAdapter<MessageModel> adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        listOfMessages = (ListView)findViewById(R.id.list_of_messages);
 
         if(FirebaseAuth.getInstance().getCurrentUser() == null) {
             startActivityForResult(
@@ -72,38 +83,48 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        btn = findViewById(R.id.btntest);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                displayMessages();
+            }
+        });
     }
 
     public void displayMessages(){
-        ListView listOfMessages = (ListView)findViewById(R.id.list_of_messages);
-
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         String uid = firebaseUser.getUid();
 
-        Query query = FirebaseDatabase.getInstance().getReference().child(uid);
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+
+        Query query = getQuery(mDatabase);
 
         FirebaseListOptions<MessageModel> options =
                 new FirebaseListOptions.Builder<MessageModel>()
                         .setQuery(query, MessageModel.class)
-                        .setLayout(android.R.layout.simple_list_item_1)
+                        .setLayout(R.layout.activity_message)
                         .build();
 
-        FirebaseListAdapter<MessageModel> adapter = new FirebaseListAdapter<MessageModel>(this, MessageModel.class,
-                R.layout.activity_message, FirebaseDatabase.getInstance().getReference()) {
+/*        FirebaseListAdapter<MessageModel> adapter = new FirebaseListAdapter<MessageModel>(this, MessageModel.class,
+                R.layout.activity_message, FirebaseDatabase.getInstance().getReference()) {*/
 
-        /*FirebaseListAdapter<MessageModel> adapter = new FirebaseListAdapter<MessageModel>(options) {*/
+        adapter = new FirebaseListAdapter<MessageModel>(options) {
             @Override
-            protected void populateView(View v, MessageModel model, int position) {
+            public void populateView(View v, MessageModel model, int position) {
                 TextView messageText = (TextView) v.findViewById(R.id.message_text);
                 TextView messageUser = (TextView) v.findViewById(R.id.message_user);
                 TextView messageTime = (TextView) v.findViewById(R.id.message_time);
+
                 messageText.setText(model.getMessageText());
                 messageUser.setText(model.getMessageUser());
                 messageTime.setText(DateFormat.format("dd-MM-yyyy (HH:mm:ss)",
                         model.getMessageTime()));
+
+                LayoutInflater inflater = LayoutInflater.from(v.getContext());
+                inflater.inflate(R.layout.activity_message, (ViewGroup) v, false);
             }
         };
-
         listOfMessages.setAdapter(adapter);
     }
 
@@ -152,5 +173,10 @@ public class MainActivity extends AppCompatActivity {
                     });
         }
         return true;
+    }
+
+    private Query getQuery(DatabaseReference mDatabase){
+        Query query = mDatabase.child("chatting");
+        return query;
     }
 }
